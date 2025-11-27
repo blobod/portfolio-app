@@ -33,12 +33,19 @@ jobs:
         run: npm ci
 
       - name: Build Angular app
-        run: npm run build -- --base-href=/portfolio-app/
+        run: npm run build
+
+      - name: List build output (debug)
+        run: |
+          echo "Listing dist directory:"
+          ls -laR dist/
+          echo "Checking for index.html:"
+          find dist/ -name "index.html" -exec ls -lh {} \;
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist/portfolio-app/browser
+          path: dist/portfolio-app/browser
 
   deploy:
     environment:
