@@ -32,7 +32,7 @@ export class GitHubService {
       title: 'Portfolio Website',
       description: 'A modern, responsive portfolio website built with Angular featuring dynamic GitHub integration, showcasing projects with professional design and smooth user experience.',
       technologies: ['Angular', 'TypeScript', 'CSS3', 'GitHub API'],
-      githubUrl: 'https://github.com/blobod/portfolio-website',
+      githubUrl: 'https://github.com/blobod/portfolio-app',
       lastUpdated: new Date(),
       featured: true
     },
@@ -53,19 +53,29 @@ export class GitHubService {
       featured: true
     },
     {
-      title: 'Medius',
-      description: 'Java-based interpreter implementation for Medius, a custom programming language featuring lexical analysis and parsing.',
-      technologies: ['Java', 'Antlr'],
-      githubUrl: 'https://github.com/blobod/Medius',
-      lastUpdated: new Date('2023-10-10'),
-      featured: false
+      title: 'Taskboard Application',
+      description: 'A full-stack task management application built with Java Spring Boot and modern frontend tools. Supports task creation, status tracking, and a clean REST API for easy integration.',
+      technologies: ['Java', 'Springboot', 'Postman', 'PostgreSQL', 'Angular', 'Selenium'],
+      githubUrl: 'https://github.com/blobod/Taskboard-Project',
+      lastUpdated: new Date('2025-11-27'),
+      featured: true
     },
     
   ];
 
-  getProjects(): Observable<Project[]> {
-    return of(this.featuredProjects);
-  }
+getProjects(): Observable<Project[]> {
+  return forkJoin([
+    of(this.featuredProjects),
+    this.getGitHubProjects().pipe(catchError(() => of([])))
+  ]).pipe(
+    map(([featured, github]) => {
+      const featuredUrls = new Set(featured.map(p => p.githubUrl));
+      const filteredGithub = github.filter(p => !featuredUrls.has(p.githubUrl));
+      return [...featured, ...filteredGithub];
+    })
+  );
+}
+
 
   private getGitHubProjects(): Observable<Project[]> {
     const url = `https://api.github.com/users/${this.username}/repos?sort=pushed&per_page=20`;
